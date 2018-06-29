@@ -1,0 +1,24 @@
+[*]
+[*] GTKWave Analyzer v3.3.91 (w)1999-2018 BSI
+[*] Fri Jun 29 08:24:38 2018
+[*]
+[dumpfile] "/Users/konradbeckmann/dev/verifuck/verifuck_tb.vcd"
+[dumpfile_mtime] "Fri Jun 29 08:24:03 2018"
+[dumpfile_size] 3071
+[savefile] "/Users/konradbeckmann/dev/verifuck/verifuck_tb.gtkw"
+[timestart] 0
+[size] 1680 1005
+[pos] -158 -60
+*-1.884700 0 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] verifuck_tb.
+[sst_width] 193
+[signals_width] 208
+[sst_expanded] 1
+[sst_vpaned_height] 310
+@28
+verifuck_tb.C1.clk
+@22
+verifuck_tb.C1.data[25:0]
+verifuck_tb.C1.leds[3:0]
+[pattern_trace] 1
+[pattern_trace] 0
