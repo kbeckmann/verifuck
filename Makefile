@@ -1,6 +1,8 @@
 PROJECT=verifuck
-SRC=verifuck.v
+SRC=blockram.v rom.v proc.v
+
 BINARY=$(PROJECT).bin
+BINARY_SRC=$(SRC) $(PROJECT).v
 
 SIM_BINARY=$(PROJECT)_tb.out
 SIM_SRC=$(SRC) verifuck_tb.v
@@ -8,8 +10,8 @@ SIM_VCD=$(PROJECT)_tb.vcd
 
 all:build
 
-$(PROJECT).blif:$(SRC)
-	yosys -p "synth_ice40 -blif $(PROJECT).blif" $(SRC)
+$(PROJECT).blif:$(BINARY_SRC)
+	yosys -p "synth_ice40 -blif $(PROJECT).blif" $(BINARY_SRC)
 
 $(PROJECT).txt:$(PROJECT).blif
 	arachne-pnr -d 1k -p $(PROJECT).pcf $(PROJECT).blif -o $(PROJECT).txt
