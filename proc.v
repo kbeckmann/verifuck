@@ -46,18 +46,17 @@ reg prog_ren;
 reg [7:0] data_addr;
 reg data_wen;
 reg data_ren;
-reg [7:0] data_wval;
+reg [7:0] data_wval = 0;
 
 `define STATE_RESET			3'b000
 `define STATE_FETCHDECODE	3'b001
 `define STATE_EXECUTE		3'b010
 `define STATE_WRITE			3'b100
 
-reg [2:0] state;
+reg [2:0] state = `STATE_RESET;
 
 always @(posedge clk) begin
 	if (reset) begin
-		stdout_en <= state[0]; // this is wrong but uhm.. seems to wake up everything. let's figure it out later!
 		state <= `STATE_RESET;
 		prog_ren <= 0;
 		data_wen <= 0;
