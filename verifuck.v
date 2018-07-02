@@ -1,12 +1,17 @@
-module verifuck(input clk, output [3:0] leds);
+`include "baudgen.vh"
+
+module verifuck(input clk, output [3:0] leds, output uart_tx_pin, input uart_rx_pin);
 
 	reg reset;
+	wire resetn = !reset;
+
 	reg [25:0] counter = 0;
 	wire clk_downsampled;
-	assign clk_downsampled = counter[20];
+	assign clk_downsampled = counter[22];
 
 	initial begin
 		reset = 1;
+		uart_tx_start = 0;
 	end
 
 	wire [7:0] prog_addr;
@@ -21,13 +26,21 @@ module verifuck(input clk, output [3:0] leds);
 	wire [7:0] stdout;
 	wire stdout_en;
 
+	// uart_tx
+	wire ready;
+	reg uart_tx_start;
+
 	reg blinky = 0;
-	assign leds = {clk_downsampled, stdout[1:0], stdout_en};
+	assign leds = {uart_tx_pin, stdout[0], stdout_en, clk_downsampled};
 	reg [3:0] temp;
 
 	always @(posedge clk) begin
 		counter <= counter + 1;
 		reset <= 0;
+		if (ready && stdout_en)
+			uart_tx_start <= 1;
+		else
+			uart_tx_start <= 0;
 	end
 
 	proc myproc (
@@ -61,5 +74,16 @@ module verifuck(input clk, output [3:0] leds);
 		.raddr(prog_addr),
 		.rdata(prog_rval)
 	);
+
+	parameter BAUD = `B115200;
+	uart_tx #(.BAUD(BAUD))
+		TX0 (
+			.clk(clk),
+			.rstn(resetn),
+			.data(stdout),
+			.start(uart_tx_start),
+			.ready(ready),
+			.tx(uart_tx_pin)
+		);
 
 endmodule

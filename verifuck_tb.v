@@ -2,6 +2,7 @@ module bf_tb;
 
 	reg reset;
 	reg clk;
+	always #10 clk = !clk;
 
 	integer i;
 	initial begin
@@ -9,23 +10,10 @@ module bf_tb;
 
 		reset = 1;
 		clk = 1;
-/*
-		for (i = 0; i < program_rom.NUM_WORDS; i += 1) begin
-			program_rom.mem[i] <= 0;
-		end
 
-		for (i = 0; i < data_ram.NUM_WORDS; i += 1) begin
-			data_ram.mem[i] <= 0;
-		end
-
-		#10 $readmemh("test_prog.mem", program_rom.mem);
-		#10 $readmemh("test_ram.mem", data_ram.mem);
-*/
 		#30 reset = 0;
 		#1000 $finish;
 	end
-
-	always #10 clk = !clk;
 
 	wire [7:0] prog_addr;
 	wire prog_ren;

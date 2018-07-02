@@ -1,5 +1,5 @@
 $date
-	Mon Jul  2 17:25:31 2018
+	Mon Jul  2 18:30:47 2018
 $end
 $version
 	Icarus Verilog
@@ -60,15 +60,52 @@ $var wire 1 , ren $end
 $var reg 8 B rdata [7:0] $end
 $upscope $end
 $upscope $end
+$scope module uart_tx $end
+$var wire 1 C clk $end
+$var wire 8 D data [7:0] $end
+$var wire 1 E rstn $end
+$var wire 1 F start $end
+$var wire 1 G ready $end
+$var wire 1 H load $end
+$var wire 1 I clk_baud $end
+$var wire 1 J baud_en $end
+$var reg 4 K bitc [3:0] $end
+$var reg 8 L data_r [7:0] $end
+$var reg 10 M shifter [9:0] $end
+$var reg 1 N start_r $end
+$var reg 2 O state [1:0] $end
+$var reg 1 P tx $end
+$scope module BAUD0 $end
+$var wire 1 C clk $end
+$var wire 1 J clk_ena $end
+$var wire 1 I clk_out $end
+$var reg 7 Q divcounter [6:0] $end
+$upscope $end
+$upscope $end
 $enddefinitions $end
 #0
 $dumpvars
+b0 Q
+xP
+bx O
+xN
+bx M
+bx L
+bx K
+xJ
+xI
+xH
+xG
+zF
+zE
+bz D
+zC
 bx B
 b0 A
 b0 @
 b0 ?
 b0 >
-bx =
+b0 =
 b0 <
 bx ;
 bx :
@@ -76,19 +113,19 @@ bx 9
 bx 8
 b0 7
 b0 6
-bx 5
+b0 5
 14
 13
 b0 2
 01
 bx 0
 0/
-bx .
+b0 .
 b0 -
 0,
 bx +
 b0 *
-x)
+0)
 b111110 (
 b101110 '
 b111110 &
@@ -101,7 +138,6 @@ $end
 #10
 03
 #20
-0)
 13
 #30
 03

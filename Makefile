@@ -1,5 +1,11 @@
 PROJECT=verifuck
-SRC=blockram.v rom.v proc.v
+SRC= \
+	baudgen.v \
+	blockram.v \
+	proc.v \
+	rom.v \
+	uart_tx.v \
+
 
 BINARY=$(PROJECT).bin
 BINARY_SRC=$(SRC) $(PROJECT).v

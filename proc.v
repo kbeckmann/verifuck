@@ -1,6 +1,5 @@
-// set the opcodes. this takes the ascii value of
-// these keys so a brainfuck program can go straight
-// into memory, at the expense of a few bits.
+// Used https://github.com/jackcarrozzo/brainfuck-processor as a baseline
+
 `define INCDP   ">"
 `define DECDP   "<"
 `define INCDATA "+"
