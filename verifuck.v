@@ -24,10 +24,9 @@ module verifuck(input clk, input cpu_clk, output [3:0] leds, output uart_tx_pin,
 	wire stdout_en;
 
 	// uart_tx
-	wire ready;
+	wire uart_tx_ready;
 	reg uart_tx_start;
 
-	reg blinky = 0;
 	assign leds = {uart_tx_pin, stdout[0], stdout_en, cpu_clk};
 	reg [3:0] temp;
 
@@ -40,7 +39,7 @@ module verifuck(input clk, input cpu_clk, output [3:0] leds, output uart_tx_pin,
 				stdout_en_ongoing <= 1;
 				uart_tx_start <= 1;
 			end else begin
-				if (ready) begin
+				if (uart_tx_ready) begin
 					uart_tx_start <= 0;
 				end
 			end
@@ -87,7 +86,7 @@ module verifuck(input clk, input cpu_clk, output [3:0] leds, output uart_tx_pin,
 			.rstn(resetn),
 			.data(stdout),
 			.start(uart_tx_start),
-			.ready(ready),
+			.ready(uart_tx_ready),
 			.tx(uart_tx_pin)
 		);
 

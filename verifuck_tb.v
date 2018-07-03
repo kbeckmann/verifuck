@@ -4,7 +4,7 @@ module bf_tb;
 	reg [25:0] counter = 0;
 	always #10 clk = !clk;
 	wire cpu_clk;
-	assign cpu_clk = counter[7];
+	assign cpu_clk = counter[4];
 
 	wire uart_tx_pin;
 
@@ -12,7 +12,7 @@ module bf_tb;
 		$dumpvars;
 		clk = 1;
 
-		#100000 $write("\n");
+		#5000000 $write("\n");
 		#1 $finish;
 	end
 

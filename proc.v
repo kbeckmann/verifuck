@@ -8,6 +8,7 @@
 `define INONE   ","
 `define CONDJMP "["
 `define JMPBACK "]"
+`define ZERO    8'h00
 
 module proc (
 	prog_addr,	// out: program instruction address
@@ -40,17 +41,37 @@ input       reset;
 
 wire [7:0] register = data_rval;
 
-reg [7:0] prog_addr;
-reg prog_ren;
-reg [7:0] data_addr;
-reg data_wen;
-reg data_ren;
+reg [7:0] prog_addr = 0;
+reg prog_ren = 0;
+reg [7:0] data_addr = 0;
+reg data_wen = 0;
+reg data_ren = 0;
 reg [7:0] data_wval = 0;
+
+reg [7:0] prog_stack [0:7]; // 8 depth stack
+reg [7:0] stack_index = 0;
+
+// Used for debugging, they are free when synthesized
+wire [7:0] prog_stack_0 = prog_stack[0];
+wire [7:0] prog_stack_1 = prog_stack[1];
+wire [7:0] prog_stack_2 = prog_stack[2];
+wire [7:0] current_stack_ptr = prog_stack[stack_index];
+
+initial begin
+	prog_stack[0] = 0;
+	prog_stack[1] = 0;
+	prog_stack[2] = 0;
+	prog_stack[3] = 0;
+	prog_stack[4] = 0;
+	prog_stack[5] = 0;
+	prog_stack[6] = 0;
+	prog_stack[7] = 0;
+end
 
 `define STATE_RESET			3'b000
 `define STATE_FETCHDECODE	3'b001
 `define STATE_EXECUTE		3'b010
-`define STATE_WRITE			3'b100
+`define STATE_PREPARE_FETCH	3'b100
 
 reg [2:0] state = `STATE_RESET;
 
@@ -63,7 +84,9 @@ always @(posedge clk) begin
 		data_addr <= 0;
 		prog_addr <= 0;
 	end else begin
-		//$monitor("executing: %c", prog_rval);
+		//$monitor("state=%d data_addr=%d data_rval=%d prog_addr=%d prog_rval=%d %c",
+		//	state, data_addr, data_rval, prog_addr, prog_rval, prog_rval);
+
 		case (state)
 		`STATE_RESET: begin
 			prog_ren <= 1;
@@ -82,12 +105,12 @@ always @(posedge clk) begin
 		`STATE_EXECUTE: begin
 			// Program and data are ready to be executed
 			prog_ren <= 1;
-			data_wen <= 0;
 			data_ren <= 1;
-			prog_addr <= prog_addr + 1;
+			if (prog_rval != `JMPBACK)
+				prog_addr <= prog_addr + 1;
 			end
-		`STATE_WRITE: begin
-			// Writes data, prepare for read
+		`STATE_PREPARE_FETCH: begin
+			// Buffer state for read and write.
 			prog_ren <= 1;
 			data_wen <= 0;
 			data_ren <= 1;
@@ -98,50 +121,57 @@ always @(posedge clk) begin
 		endcase
 
 		if (state == `STATE_EXECUTE) begin
+			state <= `STATE_PREPARE_FETCH;
 			if (prog_rval == `INCDATA || prog_rval == `DECDATA) begin
 				data_wen <= 1;
-				state <= `STATE_WRITE;
 			end else begin
 				data_wen <= 0;
-				state <= `STATE_FETCHDECODE;
 			end
 
 			case (prog_rval)
 				`INCDP: begin
 					data_addr <= data_addr + 1;
-					end
+				end
 				`DECDP: begin
 					data_addr <= data_addr - 1;
-					end
+				end
 				`INCDATA: begin
 					data_wval <= register + 1;
-					end
+				end
 				`DECDATA: begin
 					data_wval <= register - 1;
-					end
+				end
 				`OUTONE: begin
 					stdout <= data_rval;
 					stdout_en <= 1;
-					//$write("%c", data_rval);
-					end
+				end
 				`INONE: begin
-					//data <= myin;
-					//data_wval <= data;
-					//data_wen <= 1;
-					//prog_addr <= prog_addr+1;
-					//data_wen <= 0;
-					end
+					//TODO
+				end
 				`CONDJMP: begin
-					//data_wen <= 0;
-					end
+					//$monitor("{LOOP START storing @%d = %d+1}", stack_index, prog_addr);
+					prog_stack[stack_index] <= prog_addr + 1; // Store where to jump back to
+					stack_index <= stack_index + 1;
+				end
 				`JMPBACK: begin
-					//data_wen <= 0;
+					if (register == 0) begin
+						//$monitor("{LOOP END %d jmp->%d+1}", register, prog_addr);
+						stack_index <= stack_index - 1;
+						prog_addr <= prog_addr + 1;
+					end else begin
+						//$monitor("{LOOP END %d jmp->%d}", register, current_stack_ptr);
+						prog_addr <= prog_stack[stack_index - 1];
 					end
+				end
+				`ZERO: begin
+					$monitor("Program ended");
+					//$finish;
+				end
 				default: begin
 					data_addr <= 0;
 					prog_addr <= 0;
-					end
-			endcase //undefined opcodes not supported
+				end
+			endcase
 		end
 	end
 end
