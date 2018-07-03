@@ -1,4 +1,7 @@
 dump.vcd
+verifuck_tb.out
+verifuck.bin
+verifuck.blif
 verifuck.gtkw
 verifuck.out
-verifuck_tb.out
+verifuck.txt
