@@ -1,13 +1,10 @@
 `include "baudgen.vh"
 
-module verifuck(input clk, output [3:0] leds, output uart_tx_pin, input uart_rx_pin);
+module verifuck(input clk, input cpu_clk, output [3:0] leds, output uart_tx_pin, input uart_rx_pin);
+	parameter UART_TX_BAUD = `B115200;
 
 	reg reset;
 	wire resetn = !reset;
-
-	reg [25:0] counter = 0;
-	wire clk_downsampled;
-	assign clk_downsampled = counter[22];
 
 	initial begin
 		reset = 1;
@@ -31,16 +28,25 @@ module verifuck(input clk, output [3:0] leds, output uart_tx_pin, input uart_rx_
 	reg uart_tx_start;
 
 	reg blinky = 0;
-	assign leds = {uart_tx_pin, stdout[0], stdout_en, clk_downsampled};
+	assign leds = {uart_tx_pin, stdout[0], stdout_en, cpu_clk};
 	reg [3:0] temp;
 
+	reg stdout_en_ongoing = 0;
+
 	always @(posedge clk) begin
-		counter <= counter + 1;
 		reset <= 0;
-		if (ready && stdout_en)
-			uart_tx_start <= 1;
-		else
-			uart_tx_start <= 0;
+		if (stdout_en) begin
+			if (!stdout_en_ongoing) begin
+				stdout_en_ongoing <= 1;
+				uart_tx_start <= 1;
+			end else begin
+				if (ready) begin
+					uart_tx_start <= 0;
+				end
+			end
+		end else begin
+			stdout_en_ongoing <= 0;
+		end
 	end
 
 	proc myproc (
@@ -54,12 +60,12 @@ module verifuck(input clk, output [3:0] leds, output uart_tx_pin, input uart_rx_
 		.data_wval(data_wval),
 		.data_rval(data_rval),
 		.prog_rval(prog_rval),
-		.clk(clk_downsampled),
+		.clk(cpu_clk),
 		.reset(reset)
 	);
 
 	blockram data_ram (
-		.clk(clk_downsampled),
+		.clk(cpu_clk),
 		.wen(data_wen),
 		.ren(data_ren),
 		.waddr(data_addr),
@@ -69,14 +75,13 @@ module verifuck(input clk, output [3:0] leds, output uart_tx_pin, input uart_rx_
 	);
 
 	rom program_rom (
-		.clk(clk_downsampled),
+		.clk(cpu_clk),
 		.ren(prog_ren),
 		.raddr(prog_addr),
 		.rdata(prog_rval)
 	);
 
-	parameter BAUD = `B115200;
-	uart_tx #(.BAUD(BAUD))
+	uart_tx #(.BAUD(UART_TX_BAUD))
 		TX0 (
 			.clk(clk),
 			.rstn(resetn),

@@ -5,10 +5,10 @@ SRC= \
 	proc.v \
 	rom.v \
 	uart_tx.v \
-
+	verifuck.v \
 
 BINARY=$(PROJECT).bin
-BINARY_SRC=$(SRC) $(PROJECT).v
+BINARY_SRC=$(SRC) top.v
 
 SIM_BINARY=$(PROJECT)_tb.out
 SIM_SRC=$(SRC) verifuck_tb.v
@@ -43,4 +43,4 @@ show:$(SIM_BINARY)
 	gtkwave $(PROJECT).gtkw
 
 clean:
-	rm -fr $(BINARY) $(PROJECT).blif $(PROJECT).txt $(SIM_BINARY) $(SIM_VCD)
+	rm -fr $(BINARY) $(PROJECT).blif $(PROJECT).txt $(SIM_BINARY) $(SIM_VCD) dump.vcd
