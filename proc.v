@@ -68,12 +68,13 @@ initial begin
 	prog_stack[7] = 0;
 end
 
-`define STATE_RESET			3'b000
-`define STATE_FETCHDECODE	3'b001
-`define STATE_EXECUTE		3'b010
-`define STATE_PREPARE_FETCH	3'b100
+`define STATE_STOP			4'b0000
+`define STATE_RESET			4'b0001
+`define STATE_FETCHDECODE	4'b0010
+`define STATE_EXECUTE		4'b0100
+`define STATE_PREPARE_FETCH	4'b1000
 
-reg [2:0] state = `STATE_RESET;
+reg [3:0] state = `STATE_RESET;
 
 always @(posedge clk) begin
 	if (reset) begin
@@ -88,6 +89,11 @@ always @(posedge clk) begin
 		//	state, data_addr, data_rval, prog_addr, prog_rval, prog_rval);
 
 		case (state)
+		`STATE_STOP: begin
+			prog_ren <= 0;
+			data_wen <= 0;
+			data_ren <= 0;
+			end
 		`STATE_RESET: begin
 			prog_ren <= 1;
 			data_wen <= 0;
@@ -121,7 +127,13 @@ always @(posedge clk) begin
 		endcase
 
 		if (state == `STATE_EXECUTE) begin
-			state <= `STATE_PREPARE_FETCH;
+			if (prog_rval != `ZERO) begin
+				state <= `STATE_PREPARE_FETCH;
+			end else begin
+				// Get stuck in STOP state forever
+				state <= `STATE_STOP;
+			end
+
 			if (prog_rval == `INCDATA || prog_rval == `DECDATA) begin
 				data_wen <= 1;
 			end else begin
