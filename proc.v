@@ -30,6 +30,7 @@ parameter DATA_ADDR_WIDTH = 8;
 parameter DATA_VALUE_WIDTH = 8;
 parameter PROG_ADDR_WIDTH = 8;
 parameter PROG_VALUE_WIDTH = 8;
+parameter STACK_DEPTH = 32; // takes up a ton of LUTs
 
 output reg [PROG_ADDR_WIDTH-1:0]	prog_addr = 0;
 output reg							prog_ren = 0;
@@ -48,7 +49,7 @@ input								reset;
 
 wire [DATA_VALUE_WIDTH-1:0] register = data_rval;
 
-reg [PROG_ADDR_WIDTH-1:0] prog_stack [0:7]; // 8 depth stack
+reg [PROG_ADDR_WIDTH-1:0] prog_stack [0:STACK_DEPTH-1];
 reg [PROG_ADDR_WIDTH-1:0] stack_index = 0;
 
 // Used for debugging, they are free when synthesized
@@ -57,15 +58,10 @@ wire [7:0] prog_stack_1 = prog_stack[1];
 wire [7:0] prog_stack_2 = prog_stack[2];
 wire [7:0] current_stack_ptr = prog_stack[stack_index];
 
+integer i;
 initial begin
-	prog_stack[0] = 0;
-	prog_stack[1] = 0;
-	prog_stack[2] = 0;
-	prog_stack[3] = 0;
-	prog_stack[4] = 0;
-	prog_stack[5] = 0;
-	prog_stack[6] = 0;
-	prog_stack[7] = 0;
+	for (i = 0; i < STACK_DEPTH; i = i + 1)
+		prog_stack[i] = 0;
 end
 
 `define STATE_STOP			4'b0000
