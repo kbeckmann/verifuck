@@ -7,6 +7,10 @@ SRC= \
 	uart_tx.v \
 	verifuck.v \
 
+ADDITIONAL_DEPS= \
+	test_prog.mem \
+	test_ram.mem \
+
 BINARY=$(PROJECT).bin
 BINARY_SRC=$(SRC) top.v
 
@@ -16,7 +20,7 @@ SIM_VCD=$(PROJECT)_tb.vcd
 
 all:build
 
-$(PROJECT).blif:$(BINARY_SRC)
+$(PROJECT).blif:$(BINARY_SRC) $(ADDITIONAL_DEPS)
 	yosys -p "synth_ice40 -blif $(PROJECT).blif" $(BINARY_SRC)
 
 $(PROJECT).txt:$(PROJECT).blif
@@ -34,7 +38,7 @@ flash:$(BINARY)
 flash_program:$(BF_PROGRAM)
 	iceprog -o 64k $(BF_PROGRAM)
 
-$(SIM_BINARY):$(SIM_SRC)
+$(SIM_BINARY):$(SIM_SRC) $(ADDITIONAL_DEPS)
 	iverilog -o $(SIM_BINARY) $(SIM_SRC)
 
 sim:$(SIM_BINARY)
