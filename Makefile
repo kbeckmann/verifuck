@@ -21,6 +21,7 @@ $(PROJECT).blif:$(BINARY_SRC)
 
 $(PROJECT).txt:$(PROJECT).blif
 	arachne-pnr -d 1k -p $(PROJECT).pcf $(PROJECT).blif -o $(PROJECT).txt
+	icetime -p $(PROJECT).pcf -d lp1k $(PROJECT).txt
 
 $(BINARY):$(PROJECT).txt
 	icepack $(PROJECT).txt $(BINARY)
