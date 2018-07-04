@@ -1,3 +1,5 @@
+#!/usr/bin/env python2
+
 lines = open("/dev/stdin", "r").read().split("\n")
 for line in lines:
     if line and line[0] != '#':
