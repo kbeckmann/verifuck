@@ -21,6 +21,7 @@ module proc (
 	stdout_en,	// out: data out enable (will be toggled when there is data)
 	data_rval,	// in:  data read value
 	prog_rval,	// in:  program read value (next instruction to be executed)
+	en,			// in:  enable. Low halts the processor
 	clk,		// clock
 	reset		// reset, active low
 );
@@ -41,6 +42,7 @@ output reg							stdout_en = 0;
 
 input [DATA_VALUE_WIDTH-1:0]		data_rval;
 input [PROG_VALUE_WIDTH-1:0]		prog_rval;
+input								en;
 input								clk;
 input								reset;
 
@@ -75,14 +77,14 @@ end
 reg [3:0] state = `STATE_RESET;
 
 always @(posedge clk) begin
-	if (reset) begin
+	if (reset && en) begin
 		state <= `STATE_RESET;
 		prog_ren <= 0;
 		data_wen <= 0;
 		data_ren <= 0;
 		data_addr <= 0;
 		prog_addr <= 0;
-	end else begin
+	end else if (en) begin
 		//$monitor("state=%d data_addr=%d data_rval=%d prog_addr=%d prog_rval=%d %c",
 		//	state, data_addr, data_rval, prog_addr, prog_rval, prog_rval);
 
@@ -183,6 +185,8 @@ always @(posedge clk) begin
 				end
 			endcase
 		end
+	end else begin
+		// CPU halted
 	end
 end
 

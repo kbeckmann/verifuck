@@ -4,7 +4,8 @@ module bf_tb;
 	reg [25:0] counter = 0;
 	always #10 clk = !clk;
 	wire cpu_clk;
-	assign cpu_clk = counter[4];
+	// assign cpu_clk = counter[1];
+	assign cpu_clk = clk;
 
 	wire uart_tx_pin;
 
@@ -27,7 +28,7 @@ module bf_tb;
 	end
 
 	verifuck #(
-		.UART_TX_BAUD(4) // super fast baudrate to see the signals when simiulating...
+		.UART_TX_BAUD(3) // super fast baudrate to see the signals when simiulating...
 	)
 	myfuck (
 		.clk(clk),

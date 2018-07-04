@@ -12,6 +12,9 @@ module verifuck(input clk, input cpu_clk, output [3:0] leds, output uart_tx_pin,
 	reg reset;
 	wire resetn = !reset;
 
+	// Halt the CPU while UART is busy
+	wire cpu_en = uart_tx_ready;
+
 	initial begin
 		reset = 1;
 		uart_tx_start = 0;
@@ -71,6 +74,7 @@ module verifuck(input clk, input cpu_clk, output [3:0] leds, output uart_tx_pin,
 		.data_wval(data_wval),
 		.data_rval(data_rval),
 		.prog_rval(prog_rval),
+		.en(cpu_en),
 		.clk(cpu_clk),
 		.reset(reset)
 	);
