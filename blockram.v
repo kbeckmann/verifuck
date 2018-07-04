@@ -18,6 +18,12 @@ output reg [DATA_WIDTH-1:0] rdata;
 // Actual data storage
 reg [DATA_WIDTH-1:0] mem [0:NUM_WORDS-1];
 
+// Make the first 4 words visible in gtkwave
+wire [DATA_WIDTH-1:0] mem0 = mem[0];
+wire [DATA_WIDTH-1:0] mem1 = mem[1];
+wire [DATA_WIDTH-1:0] mem2 = mem[2];
+wire [DATA_WIDTH-1:0] mem3 = mem[3];
+
 initial begin
 	$readmemh("test_ram.mem", mem);
 end
