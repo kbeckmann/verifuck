@@ -25,31 +25,29 @@ module proc (
 	reset		// reset, active low
 );
 
-output [7:0] prog_addr;
-output       prog_ren;
-output [7:0] data_addr;
-output 	     data_wen;
-output       data_ren;
-output [7:0] data_wval;
-output reg [7:0] stdout = 0;
-output reg stdout_en = 0;
+parameter DATA_ADDR_WIDTH = 8;
+parameter DATA_VALUE_WIDTH = 8;
+parameter PROG_ADDR_WIDTH = 8;
+parameter PROG_VALUE_WIDTH = 8;
 
-input [7:0] data_rval;
-input [7:0] prog_rval;
-input       clk;
-input       reset;
+output reg [PROG_ADDR_WIDTH-1:0]	prog_addr = 0;
+output reg							prog_ren = 0;
+output reg [DATA_ADDR_WIDTH-1:0]	data_addr = 0;
+output reg							data_wen = 0;
+output reg							data_ren = 0;
+output reg [DATA_VALUE_WIDTH-1:0]	data_wval = 0;
+output reg [7:0]					stdout = 0;
+output reg							stdout_en = 0;
 
-wire [7:0] register = data_rval;
+input [DATA_VALUE_WIDTH-1:0]		data_rval;
+input [PROG_VALUE_WIDTH-1:0]		prog_rval;
+input								clk;
+input								reset;
 
-reg [7:0] prog_addr = 0;
-reg prog_ren = 0;
-reg [7:0] data_addr = 0;
-reg data_wen = 0;
-reg data_ren = 0;
-reg [7:0] data_wval = 0;
+wire [DATA_VALUE_WIDTH-1:0] register = data_rval;
 
-reg [7:0] prog_stack [0:7]; // 8 depth stack
-reg [7:0] stack_index = 0;
+reg [PROG_ADDR_WIDTH-1:0] prog_stack [0:7]; // 8 depth stack
+reg [PROG_ADDR_WIDTH-1:0] stack_index = 0;
 
 // Used for debugging, they are free when synthesized
 wire [7:0] prog_stack_0 = prog_stack[0];

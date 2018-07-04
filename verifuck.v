@@ -2,6 +2,12 @@
 
 module verifuck(input clk, input cpu_clk, output [3:0] leds, output uart_tx_pin, input uart_rx_pin);
 	parameter UART_TX_BAUD = `B115200;
+	parameter DATA_ADDR_WIDTH = 16;
+	parameter DATA_VALUE_WIDTH = 32;
+	parameter DATA_COUNT = 1024;
+	parameter PROG_ADDR_WIDTH = 16;
+	parameter PROG_VALUE_WIDTH = 8;
+	parameter PROG_COUNT = 1024;
 
 	reg reset;
 	wire resetn = !reset;
@@ -11,14 +17,14 @@ module verifuck(input clk, input cpu_clk, output [3:0] leds, output uart_tx_pin,
 		uart_tx_start = 0;
 	end
 
-	wire [7:0] prog_addr;
+	wire [PROG_ADDR_WIDTH-1:0] prog_addr;
 	wire prog_ren;
-	wire [7:0] data_addr;
+	wire [DATA_ADDR_WIDTH-1:0] data_addr;
 	wire data_wen;
 	wire data_ren;
-	wire [7:0] data_wval;
-	wire [7:0] data_rval;
-	wire [7:0] prog_rval;
+	wire [DATA_VALUE_WIDTH-1:0] data_wval;
+	wire [DATA_VALUE_WIDTH-1:0] data_rval;
+	wire [PROG_VALUE_WIDTH-1:0] prog_rval;
 
 	wire [7:0] stdout;
 	wire stdout_en;
@@ -48,7 +54,13 @@ module verifuck(input clk, input cpu_clk, output [3:0] leds, output uart_tx_pin,
 		end
 	end
 
-	proc myproc (
+	proc #(
+		.DATA_ADDR_WIDTH(DATA_ADDR_WIDTH),
+		.DATA_VALUE_WIDTH(DATA_VALUE_WIDTH),
+		.PROG_ADDR_WIDTH(PROG_ADDR_WIDTH),
+		.PROG_VALUE_WIDTH(PROG_VALUE_WIDTH)
+	)
+	myproc (
 		.prog_addr(prog_addr),
 		.prog_ren(prog_ren),
 		.data_addr(data_addr),
@@ -63,7 +75,12 @@ module verifuck(input clk, input cpu_clk, output [3:0] leds, output uart_tx_pin,
 		.reset(reset)
 	);
 
-	blockram data_ram (
+	blockram #(
+		.DATA_WIDTH(DATA_VALUE_WIDTH),
+		.ADDR_WIDTH(DATA_ADDR_WIDTH),
+		.NUM_WORDS(DATA_COUNT)
+	)
+	data_ram (
 		.clk(cpu_clk),
 		.wen(data_wen),
 		.ren(data_ren),
@@ -73,7 +90,12 @@ module verifuck(input clk, input cpu_clk, output [3:0] leds, output uart_tx_pin,
 		.rdata(data_rval)
 	);
 
-	rom program_rom (
+	rom #(
+		.DATA_WIDTH(PROG_VALUE_WIDTH),
+		.ADDR_WIDTH(PROG_ADDR_WIDTH),
+		.NUM_WORDS(PROG_COUNT)
+	)
+	program_rom (
 		.clk(cpu_clk),
 		.ren(prog_ren),
 		.raddr(prog_addr),
