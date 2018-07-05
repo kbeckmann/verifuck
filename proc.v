@@ -56,6 +56,11 @@ reg [PROG_ADDR_WIDTH-1:0] stack_index = 0;
 wire [7:0] prog_stack_0 = prog_stack[0];
 wire [7:0] prog_stack_1 = prog_stack[1];
 wire [7:0] prog_stack_2 = prog_stack[2];
+wire [7:0] prog_stack_3 = prog_stack[3];
+wire [7:0] prog_stack_4 = prog_stack[4];
+wire [7:0] prog_stack_5 = prog_stack[5];
+wire [7:0] prog_stack_6 = prog_stack[6];
+wire [7:0] prog_stack_7 = prog_stack[7];
 wire [7:0] current_stack_ptr = prog_stack[stack_index];
 
 integer i;

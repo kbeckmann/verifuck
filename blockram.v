@@ -23,6 +23,7 @@ wire [DATA_WIDTH-1:0] mem0 = mem[0];
 wire [DATA_WIDTH-1:0] mem1 = mem[1];
 wire [DATA_WIDTH-1:0] mem2 = mem[2];
 wire [DATA_WIDTH-1:0] mem3 = mem[3];
+wire [DATA_WIDTH-1:0] mem4 = mem[4];
 
 // integer i;
 initial begin

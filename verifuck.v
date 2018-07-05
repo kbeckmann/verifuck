@@ -6,8 +6,8 @@ module verifuck(input clk, input cpu_clk, output [3:0] leds, output uart_tx_pin,
 	parameter DATA_VALUE_WIDTH = 32;
 	parameter DATA_COUNT = 1024;
 	parameter PROG_ADDR_WIDTH = 16;
-	parameter PROG_VALUE_WIDTH = 8;
-	parameter PROG_COUNT = 1024;
+	parameter PROG_VALUE_WIDTH = 10; // max 2048
+	parameter PROG_COUNT = 2048;
 
 	reg reset;
 	wire resetn = !reset;
@@ -37,7 +37,8 @@ module verifuck(input clk, input cpu_clk, output [3:0] leds, output uart_tx_pin,
 	end
 
 	// Halt the CPU while UART is busy
-	wire cpu_en = uart_tx_ready && !uart_tx_start;
+	// wire cpu_en = uart_tx_ready && !uart_tx_start;
+	wire cpu_en = resetn;
 
 	always @(posedge clk) begin
 		reset <= 0;
