@@ -30,7 +30,7 @@ parameter DATA_ADDR_WIDTH = 8;
 parameter DATA_VALUE_WIDTH = 8;
 parameter PROG_ADDR_WIDTH = 8;
 parameter PROG_VALUE_WIDTH = 8;
-parameter STACK_DEPTH = 32; // takes up a ton of LUTs
+parameter STACK_DEPTH = 8; // takes up a ton of LUTs
 
 output reg [PROG_ADDR_WIDTH-1:0]	prog_addr = 0;
 output reg							prog_ren = 0;
@@ -64,17 +64,17 @@ initial begin
 		prog_stack[i] = 0;
 end
 
-`define STATE_STOP			4'b0000
-`define STATE_RESET			4'b0001
-`define STATE_FETCHDECODE	4'b0010
-`define STATE_EXECUTE		4'b0100
-`define STATE_PREPARE_FETCH	4'b1000
+localparam STATE_STOP			= 0;
+localparam STATE_RESET			= 1;
+localparam STATE_FETCHDECODE	= 2;
+localparam STATE_EXECUTE		= 3;
+localparam STATE_PREPARE_FETCH	= 4;
 
-reg [3:0] state = `STATE_RESET;
+reg [3:0] state = STATE_RESET;
 
 always @(posedge clk) begin
 	if (reset && en) begin
-		state <= `STATE_RESET;
+		state <= STATE_RESET;
 		prog_ren <= 0;
 		data_wen <= 0;
 		data_ren <= 0;
@@ -85,49 +85,49 @@ always @(posedge clk) begin
 		//	state, data_addr, data_rval, prog_addr, prog_rval, prog_rval);
 
 		case (state)
-		`STATE_STOP: begin
+		STATE_STOP: begin
 			prog_ren <= 0;
 			data_wen <= 0;
 			data_ren <= 0;
 			end
-		`STATE_RESET: begin
+		STATE_RESET: begin
 			prog_ren <= 1;
 			data_wen <= 0;
 			data_ren <= 1;
-			state <= `STATE_FETCHDECODE;
+			state <= STATE_FETCHDECODE;
 			end
-		`STATE_FETCHDECODE: begin
+		STATE_FETCHDECODE: begin
 			// Reads program and data, will be available in the next state
 			prog_ren <= 0;
 			data_wen <= 0;
 			data_ren <= 0;
 			stdout_en <= 0;
-			state <= `STATE_EXECUTE;
+			state <= STATE_EXECUTE;
 			end
-		`STATE_EXECUTE: begin
+		STATE_EXECUTE: begin
 			// Program and data are ready to be executed
 			prog_ren <= 1;
 			data_ren <= 1;
 			if (prog_rval != `JMPBACK)
 				prog_addr <= prog_addr + 1;
 			end
-		`STATE_PREPARE_FETCH: begin
+		STATE_PREPARE_FETCH: begin
 			// Buffer state for read and write.
 			prog_ren <= 1;
 			data_wen <= 0;
 			data_ren <= 1;
-			state <= `STATE_FETCHDECODE;
+			state <= STATE_FETCHDECODE;
 			end
 		default: begin
 			end
 		endcase
 
-		if (state == `STATE_EXECUTE) begin
+		if (state == STATE_EXECUTE) begin
 			if (prog_rval != `ZERO) begin
-				state <= `STATE_PREPARE_FETCH;
+				state <= STATE_PREPARE_FETCH;
 			end else begin
 				// Get stuck in STOP state forever
-				state <= `STATE_STOP;
+				state <= STATE_STOP;
 			end
 
 			if (prog_rval == `INCDATA || prog_rval == `DECDATA) begin
