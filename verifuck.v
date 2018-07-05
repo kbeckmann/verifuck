@@ -12,9 +12,6 @@ module verifuck(input clk, input cpu_clk, output [3:0] leds, output uart_tx_pin,
 	reg reset;
 	wire resetn = !reset;
 
-	// Halt the CPU while UART is busy
-	wire cpu_en = uart_tx_ready;
-
 	wire [PROG_ADDR_WIDTH-1:0] prog_addr;
 	wire prog_ren;
 	wire [DATA_ADDR_WIDTH-1:0] data_addr;
@@ -39,16 +36,19 @@ module verifuck(input clk, input cpu_clk, output [3:0] leds, output uart_tx_pin,
 		uart_tx_start = 0;
 	end
 
+	// Halt the CPU while UART is busy
+	wire cpu_en = uart_tx_ready && !uart_tx_start;
+
 	always @(posedge clk) begin
 		reset <= 0;
+
+		if (uart_tx_ready)
+			uart_tx_start <= 0;
+
 		if (stdout_en) begin
 			if (!stdout_en_ongoing) begin
 				stdout_en_ongoing <= 1;
 				uart_tx_start <= 1;
-			end else begin
-				if (uart_tx_ready) begin
-					uart_tx_start <= 0;
-				end
 			end
 		end else begin
 			stdout_en_ongoing <= 0;
