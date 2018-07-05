@@ -13,7 +13,8 @@ module bf_tb;
 		$dumpvars;
 		clk = 1;
 
-		#5000000 $write("\n");
+		// #5000000 $write("\n");
+		#100000 $write("\n");
 		#1 $finish;
 	end
 

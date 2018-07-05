@@ -13,7 +13,7 @@
 
 +++  # i = 3; loop 3 times
 [
-    <.>. #print previous slot move back
+    <.> #print previous slot move back
     - # decrease i
 ]
 
