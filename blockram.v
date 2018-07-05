@@ -24,8 +24,11 @@ wire [DATA_WIDTH-1:0] mem1 = mem[1];
 wire [DATA_WIDTH-1:0] mem2 = mem[2];
 wire [DATA_WIDTH-1:0] mem3 = mem[3];
 
+integer i;
 initial begin
-	$readmemh("test_ram.mem", mem);
+	for (i = 0; i < NUM_WORDS; i = i + 1)
+		mem[i] = 0;
+//	$readmemh("test_ram.mem", mem);
 end
 
 always @(posedge clk) begin
