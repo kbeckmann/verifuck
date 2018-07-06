@@ -2,7 +2,7 @@
 
 lines = open("/dev/stdin", "r").read().split("\n")
 for line in lines:
-    if line and line[0] != '#':
+    if line:# and line[0] != '#':
         for x in line:
 #            if x == "#":
 #                break

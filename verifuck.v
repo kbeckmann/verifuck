@@ -6,10 +6,10 @@ module verifuck(input clk, input cpu_clk, output [3:0] leds, output uart_tx_pin,
 	parameter UART_TX_BAUD = `B115200;
 	parameter DATA_ADDR_WIDTH = 16;
 	parameter DATA_VALUE_WIDTH = 32;
-	parameter DATA_COUNT = 1024;
+	parameter DATA_COUNT = 512;
 	parameter PROG_ADDR_WIDTH = 16;
-	parameter PROG_VALUE_WIDTH = 10; // max 2048
-	parameter PROG_COUNT = 2048;
+	parameter PROG_VALUE_WIDTH = 8;
+	parameter PROG_COUNT = 1024*3;
 
 	reg reset;
 	wire resetn = !reset;

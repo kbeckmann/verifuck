@@ -17,7 +17,7 @@ module bf_tb;
 		clk = 1;
 
 		// #5000000 $write("\n");
-		#1000000 $write("\n");
+		#100000000 $write("\n");
 		#1 $finish;
 	end
 
