@@ -1,3 +1,5 @@
+`default_nettype none
+
 module top(input clk, output [3:0] leds, output uart_tx_pin, input uart_rx_pin);
 
 	reg [25:0] counter = 0;
@@ -5,7 +7,7 @@ module top(input clk, output [3:0] leds, output uart_tx_pin, input uart_rx_pin);
 
 	// Use this to slow down the CPU
 	// assign cpu_clk = counter[14];
-	assign cpu_clk = counter[4];
+	assign cpu_clk = counter[6];
 	// assign cpu_clk = clk;
 
 	always @(posedge clk) begin

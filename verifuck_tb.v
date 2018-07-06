@@ -1,3 +1,6 @@
+`timescale 1 ns / 1 ps
+`default_nettype none
+
 module bf_tb;
 
 	reg clk;
@@ -14,7 +17,7 @@ module bf_tb;
 		clk = 1;
 
 		// #5000000 $write("\n");
-		#100000 $write("\n");
+		#10000000 $write("\n");
 		#1 $finish;
 	end
 

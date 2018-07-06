@@ -1,3 +1,5 @@
+`default_nettype none
+
 `include "baudgen.vh"
 
 module verifuck(input clk, input cpu_clk, output [3:0] leds, output uart_tx_pin, input uart_rx_pin);

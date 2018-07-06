@@ -1,3 +1,4 @@
+`default_nettype none
 //-----------------------------------------------------------------------------
 //-- Generacion de baudios
 //-- Señal cuadrada, de periodo igual a la frecuencia de los baudios indicados

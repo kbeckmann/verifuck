@@ -1,5 +1,7 @@
 // Used https://github.com/jackcarrozzo/brainfuck-processor as a baseline
 
+`default_nettype none
+
 `define INCDP   ">"
 `define DECDP   "<"
 `define INCDATA "+"

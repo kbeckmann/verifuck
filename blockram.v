@@ -1,4 +1,5 @@
 // Based on https://www.reddit.com/r/yosys/comments/5aqzyr/can_i_write_behavioral_verilog_that_infers_ice40/d9imje6/
+`default_nettype none
 
 module blockram (
 	clk, wen, ren,
