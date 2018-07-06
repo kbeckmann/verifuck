@@ -2,19 +2,16 @@
 
 Because why not?
 
-Verifuck is a verilog implementation of Brainfuck. It reads a brainfuck program from SPI Flash and executes it. UART rx/tx is used for stdin/stdout.
+Verifuck is a verilog implementation of Brainfuck. Currently it executes code directly from the block ram, future will support executing from SPI flash. UART rx/tx is used for stdin/stdout.
 
 ## Features
-- UART rx/tx
-- Supports reading a program from SPI flash
-- Built to run on the icestick (iCE40-HX1K-TQ144)
-
-## Architecture
-
-(far from true right now)
-4kB program size
-4kB data size (1024 32-bit words)
-
+- [X] Built to run on the icestick (iCE40-HX1K-TQ144)
+- [X] UART tx
+- [ ] UART rx
+- [X] Execute code directly from preconfigured block ram
+- [ ] Execute code from SPI flash
+- [X] Loop stack implemented using registers
+- [ ] Loop stack implemented using block ram (will support deeper stacks and shorter wires)
 
 ## Intructions
 ```
@@ -28,7 +25,7 @@ CONDJMP "[" 5b
 JMPBACK "]" 5d
 ```
 
-## Pipeline
+## Code execution stages
 
 I want to create a pipeline resembling https://en.wikipedia.org/wiki/Classic_RISC_pipeline. However I'll start with a non pipelined version.
 
