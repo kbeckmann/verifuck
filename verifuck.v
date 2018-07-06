@@ -25,13 +25,14 @@ module verifuck(input clk, input cpu_clk, output [3:0] leds, output uart_tx_pin,
 
 	wire [7:0] stdout;
 	wire stdout_en;
-	reg stdout_en_ongoing = 0;
+	reg [2:0] stdout_en_r = 0;
 
 	// uart_tx
 	wire uart_tx_ready;
 	reg uart_tx_start;
+	reg uart_tx_start_r;
 
-	assign leds = {uart_tx_pin, stdout[0], stdout_en, cpu_clk};
+	assign leds = {uart_tx_start, stdout[0], stdout_en, cpu_clk};
 
 	initial begin
 		reset = 1;
@@ -39,22 +40,20 @@ module verifuck(input clk, input cpu_clk, output [3:0] leds, output uart_tx_pin,
 	end
 
 	// Halt the CPU while UART is busy
-	// wire cpu_en = uart_tx_ready && !uart_tx_start;
-	wire cpu_en = resetn;
+	wire cpu_en = uart_tx_ready;
 
 	always @(posedge clk) begin
 		reset <= 0;
 
-		if (uart_tx_ready)
-			uart_tx_start <= 0;
+		// uart_tx_start lags behind several clock cycles
+		stdout_en_r <= {stdout_en_r[1:0], stdout_en};
+		uart_tx_start_r <= uart_tx_start;
 
-		if (stdout_en) begin
-			if (!stdout_en_ongoing) begin
-				stdout_en_ongoing <= 1;
-				uart_tx_start <= 1;
-			end
-		end else begin
-			stdout_en_ongoing <= 0;
+		// Basically posedge stdout_en
+		if (!stdout_en_r && stdout_en) begin
+			uart_tx_start <= 1;
+		end else if (uart_tx_start_r) begin
+			uart_tx_start <= 0;
 		end
 	end
 

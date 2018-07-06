@@ -6,8 +6,7 @@ module top(input clk, output [3:0] leds, output uart_tx_pin, input uart_rx_pin);
 	wire cpu_clk;
 
 	// Use this to slow down the CPU
-	// assign cpu_clk = counter[14];
-	assign cpu_clk = counter[6];
+	assign cpu_clk = counter[4];
 	// assign cpu_clk = clk;
 
 	always @(posedge clk) begin
