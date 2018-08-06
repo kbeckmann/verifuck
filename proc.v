@@ -25,7 +25,8 @@ module proc (
 	prog_rval,	// in:  program read value (next instruction to be executed)
 	en,			// in:  enable. Low halts the processor
 	clk,		// clock
-	reset		// reset, active low
+	reset,		// reset, active low
+	exception	// CPU raised an exception
 );
 
 parameter DATA_ADDR_WIDTH = 8;
@@ -42,6 +43,7 @@ output reg							data_ren = 0;
 output reg [DATA_VALUE_WIDTH-1:0]	data_wval = 0;
 output reg [7:0]					stdout = 0;
 output reg							stdout_en = 0;
+output reg							exception = 0;
 
 input [DATA_VALUE_WIDTH-1:0]		data_rval;
 input [PROG_VALUE_WIDTH-1:0]		prog_rval;
@@ -68,7 +70,7 @@ wire [7:0] current_stack_ptr = prog_stack[stack_index];
 integer i;
 initial begin
 	for (i = 0; i < STACK_DEPTH; i = i + 1)
-		prog_stack[i] = 0;
+		prog_stack[i] <= 0;
 end
 
 localparam STATE_STOP	= 0;
@@ -89,6 +91,7 @@ always @(posedge clk) begin
 		data_ren <= 0;
 		data_addr <= 0;
 		stdout_en <= 0;
+		exception <= 0;
 	end else if (en) begin
 		//$monitor("state=%d data_addr=%d data_rval=%d prog_addr=%d prog_rval=%d %c",
 		//	state, data_addr, data_rval, prog_addr, prog_rval, prog_rval);
@@ -131,7 +134,9 @@ always @(posedge clk) begin
 				// read current stack pointer
 			end
 
-			if (prog_rval == `ZERO) begin
+			if ((prog_rval == `ZERO) ||
+				(prog_rval == `JMPBACK && stack_index == 0)
+			) begin
 				state <= STATE_STOP;
 			end else begin
 				state <= STATE_MEM;
@@ -181,5 +186,34 @@ always @(posedge clk) begin
 		// CPU halted
 	end
 end
+
+`ifdef FORMAL
+
+integer clk_ticks = 0;
+always @(posedge clk) begin
+	clk_ticks <= clk_ticks + 1;
+
+	if (reset == 0 && state != STATE_STOP) begin
+		// Check that the state machine always changes states correctly
+		if ($past(state) != state) begin
+			if ($past(state) == STATE_IF) assert (state == STATE_EX);
+			if ($past(state) == STATE_EX) assert (state == STATE_MEM);
+			if ($past(state) == STATE_MEM) assert (state == STATE_WB);
+			if ($past(state) == STATE_WB) assert (state == STATE_IF);
+		end
+		// if ($past(prog_addr) != prog_addr) assert(prog_addr == $past(prog_addr) + 1);
+	end
+
+	// Verify that executing ] when stack_index == 0 leads to the STOP state
+	if (clk_ticks > 3 &&
+		$past(state) == STATE_EX &&
+		$past(stack_index) == 0 &&
+		$past(prog_rval, 2) == `JMPBACK &&
+		$past(prog_rval, 1) == `JMPBACK
+	)
+		assert (state == STATE_STOP);
+end
+
+`endif
 
 endmodule
