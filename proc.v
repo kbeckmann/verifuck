@@ -135,6 +135,7 @@ always @(posedge clk) begin
 			end
 
 			if ((prog_rval == `ZERO) ||
+				(prog_rval == `CONDJMP && stack_index == STACK_DEPTH-1) ||
 				(prog_rval == `JMPBACK && stack_index == 0)
 			) begin
 				state <= STATE_STOP;
@@ -212,6 +213,16 @@ always @(posedge clk) begin
 		$past(prog_rval, 1) == `JMPBACK
 	)
 		assert (state == STATE_STOP);
+
+	// Verify that executing [ when stack_index == STACK_DEPTH-1 leads to the STOP state
+	if (clk_ticks > 3 &&
+		$past(state) == STATE_EX &&
+		$past(stack_index) == STACK_DEPTH-1 &&
+		$past(prog_rval, 2) == `CONDJMP &&
+		$past(prog_rval, 1) == `CONDJMP
+	)
+		assert (state == STATE_STOP);
+
 end
 
 `endif
