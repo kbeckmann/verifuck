@@ -53,4 +53,4 @@ formal.smt2: $(SIM_SRC)
 	yosys -ql formal.yslog -p 'read_verilog -formal $(SIM_SRC); prep -top verifuck_formal -nordff; write_smt2 -wires formal.smt2'
 
 clean:
-	rm -fr $(BINARY) $(PROJECT).blif $(PROJECT).txt $(SIM_BINARY) $(SIM_VCD) dump.vcd
+	rm -fr $(BINARY) $(PROJECT).blif $(PROJECT).txt $(SIM_BINARY) $(SIM_VCD) dump.vcd formal.smt2 formal.vcd formal.yslog
