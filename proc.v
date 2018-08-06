@@ -196,18 +196,19 @@ integer clk_ticks = 0;
 always @(posedge clk) begin
 	clk_ticks <= clk_ticks + 1;
 
+	// Assume that prog_rval only is allowed to change when prog_ren is high
+	if (!prog_ren)
+		assume ($past(prog_rval) == prog_rval);
+
 	if (reset == 0 && state != STATE_STOP) begin
 		// Check that the state machine always changes states correctly
-		if ($past(state) != state) begin
-			if ($past(state) == STATE_IF) assert (state == STATE_EX);
-			if ($past(state) == STATE_EX) assert (state == STATE_MEM);
-			if ($past(state) == STATE_MEM) assert (state == STATE_WB);
-			if ($past(state) == STATE_WB) assert (state == STATE_IF);
-		end
-		// if ($past(prog_addr) != prog_addr) assert(prog_addr == $past(prog_addr) + 1);
+		if ($past(state) == STATE_IF) assert (state == STATE_EX);
+		if ($past(state) == STATE_EX) assert (state == STATE_MEM);
+		if ($past(state) == STATE_MEM) assert (state == STATE_WB);
+		if ($past(state) == STATE_WB) assert (state == STATE_IF);
 	end
 
-	// Verify that executing < when data_addr == 0 leads to the STOP state
+	// Assert that executing < when data_addr == 0 leads to the STOP state
 	if (clk_ticks > 3 &&
 		$past(state) == STATE_EX &&
 		$past(data_addr) == 0 &&
@@ -216,7 +217,7 @@ always @(posedge clk) begin
 	)
 		assert (state == STATE_STOP);
 
-	// Verify that executing > when data_addr == DATA_ADDR_WIDTH**2-1 leads to the STOP state
+	// Assert that executing > when data_addr == DATA_ADDR_WIDTH**2-1 leads to the STOP state
 	if (clk_ticks > 3 &&
 		$past(state) == STATE_EX &&
 		$past(data_addr) == DATA_ADDR_WIDTH**2-1 &&
@@ -225,7 +226,7 @@ always @(posedge clk) begin
 	)
 		assert (state == STATE_STOP);
 
-	// Verify that executing [ when stack_index == STACK_DEPTH-1 leads to the STOP state
+	// Assert that executing [ when stack_index == STACK_DEPTH-1 leads to the STOP state
 	if (clk_ticks > 3 &&
 		$past(state) == STATE_EX &&
 		$past(stack_index) == STACK_DEPTH-1 &&
@@ -234,7 +235,7 @@ always @(posedge clk) begin
 	)
 		assert (state == STATE_STOP);
 
-	// Verify that executing ] when stack_index == 0 leads to the STOP state
+	// Assert that executing ] when stack_index == 0 leads to the STOP state
 	if (clk_ticks > 3 &&
 		$past(state) == STATE_EX &&
 		$past(stack_index) == 0 &&
