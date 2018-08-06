@@ -17,7 +17,7 @@ module verifuck_tb;
 		clk = 1;
 
 		// #5000000 $write("\n");
-		#10000000 $write("\n");
+		#15000000 $write("\n");
 `ifdef FORMAL
 `else
 		#1 $finish;
@@ -45,7 +45,6 @@ module verifuck_tb;
 		.cpu_clk(cpu_clk),
 		.uart_tx_pin(uart_tx_pin)
 	);
-
 
 `ifdef FORMAL
 	// TODO

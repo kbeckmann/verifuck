@@ -122,7 +122,7 @@ endmodule
 `ifdef FORMAL
 module verifuck_formal(
 		input clk,
-		output uart_tx_pin,
+		// output uart_tx_pin,
 		input uart_rx_pin,
 
 		input wire [PROG_VALUE_WIDTH-1:0] prog_rval,
@@ -161,23 +161,12 @@ module verifuck_formal(
 		uart_tx_start = 0;
 	end
 
-	// Halt the CPU while UART is busy
-	// reg cpu_en = 1;
-	wire cpu_en = uart_tx_ready;
+	// (don't) Halt the CPU while UART is busy
+	reg cpu_en = 1;
+	// wire cpu_en = uart_tx_ready;
 
 	always @(posedge clk) begin
 		reset <= 0;
-
-		// uart_tx_start lags behind several clock cycles
-		stdout_en_r <= {stdout_en_r[1:0], stdout_en};
-		uart_tx_start_r <= uart_tx_start;
-
-		// Basically posedge stdout_en
-		if (!stdout_en_r && stdout_en) begin
-			uart_tx_start <= 1;
-		end else if (uart_tx_start_r) begin
-			uart_tx_start <= 0;
-		end
 	end
 
 	proc #(
@@ -216,7 +205,7 @@ module verifuck_formal(
 		.wdata(data_wval),
 		.rdata(data_rval)
 	);
-
+/*
 	uart_tx #(.BAUD(UART_TX_BAUD))
 		TX0 (
 			.clk(clk),
@@ -226,9 +215,7 @@ module verifuck_formal(
 			.ready(uart_tx_ready),
 			.tx(uart_tx_pin)
 		);
-
-assume property (reset == 0 || reset == 1);
-assume property (clk == 0 || clk == 1);
+*/
 
 always @(posedge clk) begin
 	// TODO

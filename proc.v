@@ -67,12 +67,6 @@ wire [7:0] prog_stack_6 = prog_stack[6];
 wire [7:0] prog_stack_7 = prog_stack[7];
 wire [7:0] current_stack_ptr = prog_stack[stack_index];
 
-integer i;
-initial begin
-	for (i = 0; i < STACK_DEPTH; i = i + 1)
-		prog_stack[i] <= 0;
-end
-
 localparam STATE_STOP	= 0;
 localparam STATE_RESET	= 1;
 localparam STATE_IF		= 2;
@@ -82,6 +76,7 @@ localparam STATE_WB		= 5;
 
 reg [3:0] state = STATE_RESET;
 
+integer i;
 always @(posedge clk) begin
 	if (reset && en) begin
 		state <= STATE_RESET;
@@ -92,6 +87,10 @@ always @(posedge clk) begin
 		data_addr <= 0;
 		stdout_en <= 0;
 		exception <= 0;
+
+		for (i = 0; i < STACK_DEPTH; i = i + 1)
+			prog_stack[i] <= 0;
+
 	end else if (en) begin
 		//$monitor("state=%d data_addr=%d data_rval=%d prog_addr=%d prog_rval=%d %c",
 		//	state, data_addr, data_rval, prog_addr, prog_rval, prog_rval);
@@ -194,57 +193,58 @@ end
 
 integer clk_ticks = 0;
 always @(posedge clk) begin
-	if (en) begin
-		clk_ticks <= clk_ticks + 1;
+	clk_ticks <= clk_ticks + 1;
 
-		// Assume that prog_rval only is allowed to change when prog_ren is high
-		if (!prog_ren)
-			assume ($past(prog_rval) == prog_rval);
+	// Assume that prog_rval only is allowed to change when prog_ren is high
+	// Leaving this out leads to random values on prog_rval during execution...
+	if (!prog_ren) assume ($past(prog_rval) == prog_rval);
 
-		if (reset == 0 && state != STATE_STOP) begin
-			// Check that the state machine always changes states correctly
-			if ($past(state) == STATE_IF) assert (state == STATE_EX);
-			if ($past(state) == STATE_EX) assert (state == STATE_MEM);
-			if ($past(state) == STATE_MEM) assert (state == STATE_WB);
-			if ($past(state) == STATE_WB) assert (state == STATE_IF);
-		end
+	// These assumptions aren't really needed..
+	// assume (state != STATE_STOP);
+	// assume (en);
 
-		// Assert that executing < when data_addr == 0 leads to the STOP state
-		if (clk_ticks > 3 &&
-			$past(state) == STATE_EX &&
-			$past(data_addr) == 0 &&
-			$past(prog_rval, 2) == `DECDP &&
-			$past(prog_rval, 1) == `DECDP
-		)
-			assert (state == STATE_STOP);
-
-		// Assert that executing > when data_addr == DATA_ADDR_WIDTH**2-1 leads to the STOP state
-		if (clk_ticks > 3 &&
-			$past(state) == STATE_EX &&
-			$past(data_addr) == DATA_ADDR_WIDTH**2-1 &&
-			$past(prog_rval, 2) == `INCDP &&
-			$past(prog_rval, 1) == `INCDP
-		)
-			assert (state == STATE_STOP);
-
-		// Assert that executing [ when stack_index == STACK_DEPTH-1 leads to the STOP state
-		if (clk_ticks > 3 &&
-			$past(state) == STATE_EX &&
-			$past(stack_index) == STACK_DEPTH-1 &&
-			$past(prog_rval, 2) == `CONDJMP &&
-			$past(prog_rval, 1) == `CONDJMP
-		)
-			assert (state == STATE_STOP);
-
-		// Assert that executing ] when stack_index == 0 leads to the STOP state
-		if (clk_ticks > 3 &&
-			$past(state) == STATE_EX &&
-			$past(stack_index) == 0 &&
-			$past(prog_rval, 2) == `JMPBACK &&
-			$past(prog_rval, 1) == `JMPBACK
-		)
-			assert (state == STATE_STOP);
+	if (reset == 0 && state != STATE_STOP) begin
+		// Check that the state machine always changes states correctly
+		if ($past(state) == STATE_IF) assert (state == STATE_EX);
+		if ($past(state) == STATE_EX) assert (state == STATE_MEM);
+		if ($past(state) == STATE_MEM) assert (state == STATE_WB);
+		if ($past(state) == STATE_WB) assert (state == STATE_IF);
 	end
+
+	// Assert that executing < when data_addr == 0 leads to the STOP state
+	if (clk_ticks > 0 &&
+		$past(state) == STATE_EX &&
+		$past(data_addr) == 0 &&
+		$past(prog_rval) == `DECDP
+	)
+		assert (state == STATE_STOP);
+
+	// Assert that executing > when data_addr == DATA_ADDR_WIDTH**2-1 leads to the STOP state
+	if (clk_ticks > 0 &&
+		$past(state) == STATE_EX &&
+		$past(data_addr) == DATA_ADDR_WIDTH**2-1 &&
+		$past(prog_rval) == `INCDP
+	)
+		assert (state == STATE_STOP);
+
+	// Assert that executing [ when stack_index == STACK_DEPTH-1 leads to the STOP state
+	if (clk_ticks > 0 &&
+		$past(state) == STATE_EX &&
+		$past(stack_index) == STACK_DEPTH-1 &&
+		$past(prog_rval) == `CONDJMP
+	)
+		assert (state == STATE_STOP);
+
+	// Assert that executing ] when stack_index == 0 leads to the STOP state
+	if (clk_ticks > 0 &&
+		$past(state) == STATE_EX &&
+		$past(stack_index) == 0 &&
+		$past(prog_rval) == `JMPBACK
+	)
+		assert (state == STATE_STOP);
+
+	// Just for fun, see if you can make it print stuff!
+	// assert(!((stdout == 2) && ($past(stdout) == 3)));
 end
 
 `endif
