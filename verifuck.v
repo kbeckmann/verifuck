@@ -162,8 +162,8 @@ module verifuck_formal(
 	end
 
 	// Halt the CPU while UART is busy
-	reg cpu_en = 1;
-	// wire cpu_en = uart_tx_ready;
+	// reg cpu_en = 1;
+	wire cpu_en = uart_tx_ready;
 
 	always @(posedge clk) begin
 		reset <= 0;
