@@ -177,65 +177,6 @@ always @(posedge clk) begin
 		end
 		endcase
 
-/*
-		if (state == STATE_EX) begin
-			if (prog_rval != `ZERO) begin
-				state <= STATE_MEM;
-			end else begin
-				// Get stuck in STOP state forever
-				state <= STATE_STOP;
-			end
-
-			if (prog_rval == `INCDATA || prog_rval == `DECDATA) begin
-				data_wen <= 1;
-			end else begin
-				data_wen <= 0;
-			end
-
-			case (prog_rval)
-				`INCDP: begin
-					data_addr <= data_addr + 1;
-				end
-				`DECDP: begin
-					data_addr <= data_addr - 1;
-				end
-				`INCDATA: begin
-					data_wval <= register + 1;
-				end
-				`DECDATA: begin
-					data_wval <= register - 1;
-				end
-				`OUTONE: begin
-					stdout <= data_rval;
-					stdout_en <= 1;
-				end
-				`INONE: begin
-					//TODO
-				end
-				`CONDJMP: begin
-					//$monitor("{LOOP START storing @%d = %d+1}", stack_index, prog_addr);
-					prog_stack[stack_index] <= prog_addr + 1; // Store where to jump back to
-					stack_index <= stack_index + 1;
-				end
-				`JMPBACK: begin
-					if (register == 0) begin
-						//$monitor("{LOOP END %d jmp->%d+1}", register, prog_addr);
-						stack_index <= stack_index - 1;
-						prog_addr <= prog_addr + 1;
-					end else begin
-						//$monitor("{LOOP END %d jmp->%d}", register, current_stack_ptr);
-						prog_addr <= prog_stack[stack_index - 1];
-					end
-				end
-				`ZERO: begin
-					$monitor("Program ended");
-					//$finish;
-				end
-				default: begin
-				end
-			endcase
-		end
-	*/
 	end else begin
 		// CPU halted
 	end
