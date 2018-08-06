@@ -135,6 +135,8 @@ always @(posedge clk) begin
 			end
 
 			if ((prog_rval == `ZERO) ||
+				(prog_rval == `DECDP && data_addr == 0) ||
+				(prog_rval == `INCDP && data_addr == 2**DATA_ADDR_WIDTH - 1) ||
 				(prog_rval == `CONDJMP && stack_index == STACK_DEPTH-1) ||
 				(prog_rval == `JMPBACK && stack_index == 0)
 			) begin
@@ -204,6 +206,24 @@ always @(posedge clk) begin
 		end
 		// if ($past(prog_addr) != prog_addr) assert(prog_addr == $past(prog_addr) + 1);
 	end
+
+	// Verify that executing < when data_addr == 0 leads to the STOP state
+	if (clk_ticks > 3 &&
+		$past(state) == STATE_EX &&
+		$past(data_addr) == 0 &&
+		$past(prog_rval, 2) == `DECDP &&
+		$past(prog_rval, 1) == `DECDP
+	)
+		assert (state == STATE_STOP);
+
+	// Verify that executing > when data_addr == DATA_ADDR_WIDTH**2-1 leads to the STOP state
+	if (clk_ticks > 3 &&
+		$past(state) == STATE_EX &&
+		$past(data_addr) == DATA_ADDR_WIDTH**2-1 &&
+		$past(prog_rval, 2) == `INCDP &&
+		$past(prog_rval, 1) == `INCDP
+	)
+		assert (state == STATE_STOP);
 
 	// Verify that executing ] when stack_index == 0 leads to the STOP state
 	if (clk_ticks > 3 &&
