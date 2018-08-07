@@ -197,7 +197,7 @@ always @(posedge clk) begin
 
 	// Assume that prog_rval only is allowed to change when prog_ren is high
 	// Leaving this out leads to random values on prog_rval during execution...
-	if (!prog_ren) assume ($past(prog_rval) == prog_rval);
+	if (!prog_ren) assume ($stable(prog_rval));
 
 	// These assumptions aren't really needed..
 	// assume (state != STATE_STOP);
