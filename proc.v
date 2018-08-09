@@ -117,12 +117,16 @@ always @(posedge clk) begin
 			state <= STATE_IF;
 		end
 		STATE_IF: begin
-			prog_ren <= 0;
-			data_wen <= 0;
-			data_ren <= 0;
-			stdout_en <= 0;
-			prog_addr <= prog_addr + 1;
-			state <= STATE_EX;
+			if (prog_addr == (2**PROG_ADDR_WIDTH-1)) begin
+				state <= STATE_STOP;
+			end else begin
+				prog_ren <= 0;
+				data_wen <= 0;
+				data_ren <= 0;
+				stdout_en <= 0;
+				prog_addr <= prog_addr + 1;
+				state <= STATE_EX;
+			end
 		end
 		STATE_EX: begin
 			if (prog_rval == `INCDP) begin
@@ -217,6 +221,14 @@ always @(posedge clk) begin
 		if ($past(state) == STATE_WB) assert (state == STATE_IF);
 	end
 
+	// Assert that state changes to stop when executing the last instruction
+	if (clk_ticks > 0 &&
+		$past(reset) == 0 && reset == 0 &&
+		$past(state) == STATE_IF &&
+		$past(prog_addr) == (2**PROG_ADDR_WIDTH-1)
+	)
+		assert(state == STATE_STOP);
+
 	// Assert that executing < when data_addr == 0 leads to the STOP state
 	if (clk_ticks > 0 &&
 		$past(reset) == 0 && reset == 0 &&
@@ -230,10 +242,12 @@ always @(posedge clk) begin
 	if (clk_ticks > 0 &&
 		$past(reset) == 0 && reset == 0 &&
 		$past(state) == STATE_EX &&
-		$past(data_addr) == DATA_ADDR_WIDTH**2-1 &&
+		$past(data_addr) == (DATA_ADDR_WIDTH**2-1) &&
 		$past(prog_rval) == `INCDP
 	)
 		assert (state == STATE_STOP);
+
+	assert(DATA_ADDR_WIDTH == 16);
 
 	// Assert that executing [ when stack_index == STACK_DEPTH-1 leads to the STOP state
 	if (clk_ticks > 0 &&
