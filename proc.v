@@ -202,8 +202,9 @@ always @(posedge clk) begin
 	// These assumptions aren't really needed..
 	// assume (state != STATE_STOP);
 	// assume (en);
+	if (clk_ticks > 1) assume ($past(reset) == 0 && reset == 0);
 
-	if (reset == 0 && state != STATE_STOP) begin
+	if ($past(reset) == 0 && reset == 0 && state != STATE_STOP) begin
 		// Check that the state machine always changes states correctly
 		if ($past(state) == STATE_IF) assert (state == STATE_EX);
 		if ($past(state) == STATE_EX) assert (state == STATE_MEM);
