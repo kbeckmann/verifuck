@@ -122,6 +122,7 @@ endmodule
 `ifdef FORMAL
 module verifuck_formal(
 		input clk,
+		input reset,
 		// output uart_tx_pin,
 		input uart_rx_pin,
 
@@ -136,7 +137,6 @@ module verifuck_formal(
 	parameter PROG_VALUE_WIDTH = 8;
 	parameter PROG_COUNT = 1024*3;
 
-	reg reset;
 	wire resetn = !reset;
 
 	wire [PROG_ADDR_WIDTH-1:0] prog_addr;
@@ -157,7 +157,7 @@ module verifuck_formal(
 	reg uart_tx_start_r;
 
 	initial begin
-		reset = 1;
+		restrict (reset); // Force initial high
 		uart_tx_start = 0;
 	end
 
@@ -165,8 +165,10 @@ module verifuck_formal(
 	reg cpu_en = 1;
 	// wire cpu_en = uart_tx_ready;
 
-	always @(posedge clk) begin
-		reset <= 0;
+	reg f_last_clk = 1;
+	always @($global_clock) begin
+		restrict(clk == !f_last_clk);
+		f_last_clk <= clk;
 	end
 
 	proc #(
