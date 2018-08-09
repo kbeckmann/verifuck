@@ -238,16 +238,14 @@ always @(posedge clk) begin
 	)
 		assert (state == STATE_STOP);
 
-	// Assert that executing > when data_addr == DATA_ADDR_WIDTH**2-1 leads to the STOP state
+	// Assert that executing > when data_addr == 2**DATA_ADDR_WIDTH-1 leads to the STOP state
 	if (clk_ticks > 0 &&
 		$past(reset) == 0 && reset == 0 &&
 		$past(state) == STATE_EX &&
-		$past(data_addr) == (DATA_ADDR_WIDTH**2-1) &&
+		$past(data_addr) == (2**DATA_ADDR_WIDTH-1) &&
 		$past(prog_rval) == `INCDP
 	)
 		assert (state == STATE_STOP);
-
-	assert(DATA_ADDR_WIDTH == 16);
 
 	// Assert that executing [ when stack_index == STACK_DEPTH-1 leads to the STOP state
 	if (clk_ticks > 0 &&
