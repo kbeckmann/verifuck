@@ -104,6 +104,8 @@ always @(posedge clk) begin
 			data_ren <= 0;
 			data_addr <= 0;
 			stdout_en <= 0;
+			exception <= 0;
+			stack_index <= 0;
 		end
 		STATE_RESET: begin
 			prog_addr <= 0;
@@ -193,6 +195,8 @@ end
 `ifdef FORMAL
 
 integer clk_ticks = 0;
+initial assume (clk_ticks == 0);
+
 always @(posedge clk) begin
 	clk_ticks <= clk_ticks + 1;
 
@@ -203,7 +207,7 @@ always @(posedge clk) begin
 	// These assumptions aren't really needed..
 	// assume (state != STATE_STOP);
 	// assume (en);
-	if (clk_ticks > 1) assume ($past(reset) == 0 && reset == 0);
+	if (clk_ticks > 1) assume (reset == 0);
 
 	if ($past(reset) == 0 && reset == 0 && state != STATE_STOP) begin
 		// Check that the state machine always changes states correctly
@@ -215,6 +219,7 @@ always @(posedge clk) begin
 
 	// Assert that executing < when data_addr == 0 leads to the STOP state
 	if (clk_ticks > 0 &&
+		$past(reset) == 0 && reset == 0 &&
 		$past(state) == STATE_EX &&
 		$past(data_addr) == 0 &&
 		$past(prog_rval) == `DECDP
@@ -223,6 +228,7 @@ always @(posedge clk) begin
 
 	// Assert that executing > when data_addr == DATA_ADDR_WIDTH**2-1 leads to the STOP state
 	if (clk_ticks > 0 &&
+		$past(reset) == 0 && reset == 0 &&
 		$past(state) == STATE_EX &&
 		$past(data_addr) == DATA_ADDR_WIDTH**2-1 &&
 		$past(prog_rval) == `INCDP
@@ -231,6 +237,7 @@ always @(posedge clk) begin
 
 	// Assert that executing [ when stack_index == STACK_DEPTH-1 leads to the STOP state
 	if (clk_ticks > 0 &&
+		$past(reset) == 0 && reset == 0 &&
 		$past(state) == STATE_EX &&
 		$past(stack_index) == STACK_DEPTH-1 &&
 		$past(prog_rval) == `CONDJMP
@@ -239,6 +246,7 @@ always @(posedge clk) begin
 
 	// Assert that executing ] when stack_index == 0 leads to the STOP state
 	if (clk_ticks > 0 &&
+		$past(reset) == 0 && reset == 0 &&
 		$past(state) == STATE_EX &&
 		$past(stack_index) == 0 &&
 		$past(prog_rval) == `JMPBACK
