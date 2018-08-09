@@ -87,6 +87,7 @@ always @(posedge clk) begin
 		data_addr <= 0;
 		stdout_en <= 0;
 		exception <= 0;
+		stack_index <= 0;
 
 		for (i = 0; i < STACK_DEPTH; i = i + 1)
 			prog_stack[i] <= 0;
