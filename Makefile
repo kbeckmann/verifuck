@@ -47,11 +47,34 @@ sim:$(SIM_BINARY)
 show:$(SIM_BINARY)
 	gtkwave $(PROJECT).gtkw
 
-formal: formal.smt2
-	yosys-smtbmc -s yices -t 100 --dump-vcd formal.vcd formal.smt2
-	yosys-smtbmc -s yices -i -t 100 --dump-vcd formal.vcd formal.smt2
-formal.smt2: $(SIM_SRC)
-	yosys -ql formal.yslog -p 'read_verilog -formal $(SIM_SRC); prep -top verifuck_formal -nordff; write_smt2 -wires formal.smt2'
+# formal verification:
+formal: formal_blockram formal_proc
+
+formal_blockram: blockram.check
+blockram.check: blockram.smt2
+	@rm -f $@
+	yosys-smtbmc --presat    -s yices -t 15 --dump-vcd blockram.vcd blockram.smt2
+	yosys-smtbmc --presat -g -s yices -t 15 --dump-vcd blockram.vcd blockram.smt2
+	yosys-smtbmc          -i -s yices -t 15 --dump-vcd blockram.vcd blockram.smt2
+	touch $@
+
+formal_proc: proc.check
+proc.check: proc.smt2
+	@rm -f $@
+	yosys-smtbmc             -s yices -t 100 --dump-vcd proc.vcd proc.smt2
+	yosys-smtbmc --presat -g -s yices -t 100 --dump-vcd proc.vcd proc.smt2
+	yosys-smtbmc          -i -s yices -t 100 --dump-vcd proc.vcd proc.smt2
+	touch $@
+
+blockram.smt2: blockram.v
+	yosys -ql blockram.yslog -p 'read_verilog -formal blockram.v; prep -top blockram -nordff; write_smt2 -wires blockram.smt2'
+
+proc.smt2: proc.v
+	yosys -ql proc.yslog -p 'read_verilog -formal proc.v; prep -top proc -nordff; write_smt2 -wires proc.smt2'
 
 clean:
-	rm -fr $(BINARY) $(PROJECT).blif $(PROJECT).txt $(SIM_BINARY) $(SIM_VCD) dump.vcd formal.smt2 formal.vcd formal.yslog
+	rm -f \
+	$(BINARY) $(PROJECT).blif $(PROJECT).txt $(SIM_BINARY) $(SIM_VCD) \
+	blockram.vcd blockram.smt2 blockram.yslog \
+	proc.vcd proc.smt2 proc.yslog \
+

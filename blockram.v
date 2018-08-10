@@ -44,4 +44,29 @@ always @(posedge clk) begin
 		rdata <= mem[raddr];
 end
 
+`ifdef	FORMAL
+
+	reg	f_past_valid;
+	initial	f_past_valid = 1'b0;
+	always @(posedge clk)
+		f_past_valid <= 1'b1;
+
+	always @(posedge clk) begin
+		if (f_past_valid &&
+			$past(wen)
+		)
+			assert(mem[$past(waddr)] == $past(wdata));
+
+		// I am not entirely sure why this works..
+		// I assumed I had to use the following:
+		// 	 assert(rdata == $past(mem[$past(raddr)]));
+		// since raddr can change after the read is done... Confused!
+		if (f_past_valid &&
+			$past(ren)
+		)
+			assert(rdata == $past(mem[raddr]));
+	end
+
+`endif
+
 endmodule
