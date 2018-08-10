@@ -114,6 +114,7 @@ always @(posedge clk) begin
 			data_ren <= 0;
 			data_addr <= 0;
 			stdout_en <= 0;
+			exception <= 0;
 			state <= STATE_IF;
 		end
 		STATE_IF: begin
@@ -250,6 +251,15 @@ always @(posedge clk) begin
 			$past(prog_rval) == `JMPBACK
 		)
 			assert (state == STATE_STOP);
+
+		// Assert that executing . will toggle stdout_en
+		if (clk_ticks > 1 && $past(reset, 2) == 0 && $past(en, 2) && $past(en, 1) && en &&
+			$past(prog_addr) < (2**PROG_ADDR_WIDTH-2) && // annoying edge case that we don't care about
+			$past(state, 2) == STATE_WB &&
+			$past(prog_rval, 2) == `OUTONE
+		) begin
+			assert ($past(stdout_en) && !stdout_en);
+		end
 
 		// Just for fun, see if you can make it print stuff!
 		// assert(!((stdout == 2) && ($past(stdout) == 3)));
