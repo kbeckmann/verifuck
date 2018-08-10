@@ -82,7 +82,8 @@ module verifuck(input clk, input cpu_clk, output [3:0] leds, output uart_tx_pin,
 	blockram #(
 		.DATA_WIDTH(DATA_VALUE_WIDTH),
 		.ADDR_WIDTH(DATA_ADDR_WIDTH),
-		.NUM_WORDS(DATA_COUNT)
+		.NUM_WORDS(DATA_COUNT),
+		.HEXFILE("test_ram.mem")
 	)
 	data_ram (
 		.clk(cpu_clk),
@@ -196,7 +197,8 @@ module verifuck_formal(
 	blockram #(
 		.DATA_WIDTH(DATA_VALUE_WIDTH),
 		.ADDR_WIDTH(DATA_ADDR_WIDTH),
-		.NUM_WORDS(DATA_COUNT)
+		.NUM_WORDS(DATA_COUNT),
+		.HEXFILE("test_ram.mem")
 	)
 	data_ram (
 		.clk(clk),
