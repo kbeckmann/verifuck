@@ -2,19 +2,19 @@
 `default_nettype none
 
 module blockram (
-	clk, wen, ren,
-	waddr, raddr,
-	wdata, rdata
+	input                       clk,
+	input                       wen,
+	input                       ren,
+	input      [ADDR_WIDTH-1:0] waddr,
+	input      [ADDR_WIDTH-1:0] raddr,
+	input      [DATA_WIDTH-1:0] wdata,
+	output reg [DATA_WIDTH-1:0] rdata
 );
 
 parameter DATA_WIDTH = 8;
 parameter ADDR_WIDTH = 8;
-parameter NUM_WORDS = 256;
-
-input clk, wen, ren;
-input [ADDR_WIDTH-1:0] waddr, raddr;
-input [DATA_WIDTH-1:0] wdata;
-output reg [DATA_WIDTH-1:0] rdata;
+parameter NUM_WORDS  = 256;
+parameter HEXFILE    = "";
 
 // Actual data storage
 reg [DATA_WIDTH-1:0] mem [0:NUM_WORDS-1];
@@ -24,14 +24,18 @@ wire [DATA_WIDTH-1:0] mem0 = mem[0];
 wire [DATA_WIDTH-1:0] mem1 = mem[1];
 wire [DATA_WIDTH-1:0] mem2 = mem[2];
 wire [DATA_WIDTH-1:0] mem3 = mem[3];
-wire [DATA_WIDTH-1:0] mem4 = mem[4];
 
-// integer i;
-initial begin
-	// for (i = 0; i < NUM_WORDS; i = i + 1)
-	// 	mem[i] = 0;
-	$readmemh("test_ram.mem", mem);
-end
+generate
+	if (HEXFILE != 0) begin
+		initial	$readmemh(HEXFILE, mem);
+	end else begin
+		integer i;
+		initial begin
+			for (i = 0; i < NUM_WORDS; i = i + 1)
+				mem[i] = {DATA_WIDTH{0}};
+		end
+	end
+endgenerate
 
 always @(posedge clk) begin
 	if (wen)
