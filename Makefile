@@ -11,7 +11,7 @@ ADDITIONAL_DEPS= \
 	test_prog.mem \
 	test_ram.mem \
 
-BINARY=$(PROJECT).bin
+BINARY=$(PROJECT).bit
 BINARY_SRC=$(SRC) top.v
 
 SIM_BINARY=$(PROJECT)_tb.out
@@ -23,7 +23,7 @@ all:build
 $(PROJECT).json:$(BINARY_SRC) $(ADDITIONAL_DEPS)
 	yosys -p 'synth_ecp5 -json $@ -top top' $(BINARY_SRC)
 
-$(PROJECT).txt:$(PROJECT).json
+$(PROJECT)_out.config:$(PROJECT).json
 	nextpnr-ecp5 --85k --lpf $(PROJECT).lpf --json $(PROJECT).json
 
 $(PROJECT).bit: $(PROJECT)_out.config
