@@ -20,15 +20,14 @@ SIM_VCD=$(PROJECT)_tb.vcd
 
 all:build
 
-$(PROJECT).blif:$(BINARY_SRC) $(ADDITIONAL_DEPS)
-	yosys -p "synth_ice40 -blif $(PROJECT).blif" $(BINARY_SRC)
+$(PROJECT).json:$(BINARY_SRC) $(ADDITIONAL_DEPS)
+	yosys -p 'synth_ecp5 -json $@ -top top' $(BINARY_SRC)
 
-$(PROJECT).txt:$(PROJECT).blif
-	arachne-pnr -d 1k -p $(PROJECT).pcf $(PROJECT).blif -o $(PROJECT).txt
-	icetime -p $(PROJECT).pcf -d lp1k $(PROJECT).txt
+$(PROJECT).txt:$(PROJECT).json
+	nextpnr-ecp5 --85k --lpf $(PROJECT).lpf --json $(PROJECT).json
 
-$(BINARY):$(PROJECT).txt
-	icepack $(PROJECT).txt $(BINARY)
+$(PROJECT).bit: $(PROJECT)_out.config
+	ecppack $< $@
 
 build:$(BINARY)
 
@@ -74,7 +73,7 @@ proc.smt2: proc.v
 
 clean:
 	rm -f \
-	$(BINARY) $(PROJECT).blif $(PROJECT).txt $(SIM_BINARY) $(SIM_VCD) \
+	$(BINARY) $(PROJECT).blif $(PROJECT).json $(PROJECT).txt $(SIM_BINARY) $(SIM_VCD) \
 	blockram.vcd blockram.smt2 blockram.yslog \
 	proc.vcd proc.smt2 proc.yslog \
 

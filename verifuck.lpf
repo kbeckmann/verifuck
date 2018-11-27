@@ -1,0 +1,7 @@
+LOCATE COMP "leds[0]" SITE "B17";
+LOCATE COMP "leds[1]" SITE "A17";
+LOCATE COMP "leds[2]" SITE "C17";
+LOCATE COMP "leds[3]" SITE "B18";
+LOCATE COMP "clk" SITE "A18";
+LOCATE COMP "uart_tx_pin" SITE "B19";
+LOCATE COMP "uart_rx_pin" SITE "A12";
